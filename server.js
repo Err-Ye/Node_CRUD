@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 //middleware
 //to accept json data
 app.use(express.json());
+//to accept form url encoded
+app.use(express.urlencoded({extended:false}))
 
 //route
 
@@ -38,6 +40,22 @@ app.get('/products/:id',async(req,res) => {
     }
 })
 
+//update data by id from mogo db
+app.put('/products/:id',async(req,res) => {
+    try {
+        const {id} = req.params;
+        const product = await Product.findByIdAndUpdate(id, req.body);
+        //cannt find any data
+        if(!product){
+            return res.status(404).json({message: `Cannot find any data with ID ${id}`})
+        }
+        const updateProduct = await Product.findById(id);
+        res.status(200).json(updateProduct);
+    } catch (error) {
+        res.status(500).json({message:error.message})
+    }
+})
+
 
 //add data to mongo db
 app.post('/product',async(req,res) => {
@@ -52,6 +70,20 @@ app.post('/product',async(req,res) => {
     }
 })
 
+
+//delete data from mongo db
+app.delete('/products/:id', async (req , res) => {
+    try {
+        const {id} = req.params;
+        const product = await Product.findByIdAndDelete(id);
+        if(!product){
+            return res.status(404).json({message: `Cannnot find any data with ID ${id}`});
+        }
+        res.status(200).json({message: `Delete data from id : ${id}`});
+    } catch (error) {
+        res.status(500).json({message:error.message})
+    }
+})
 
 
 mongoose.connect('mongodb+srv://root:root123@cluster0.vr3f3ov.mongodb.net/Node-API?retryWrites=true&w=majority&appName=Cluster0')
